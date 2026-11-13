@@ -3,25 +3,21 @@ import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import DataGate from '../components/DataGate';
 import KpiCard from '../components/KpiCard';
+import SensorCard from '../components/SensorCard';
 import Panel from '../components/Panel';
-import ReservoirTank from '../components/ReservoirTank';
-import AlertList from '../components/AlertList';
-import { LevelChart, ProportionChart } from '../components/Charts';
+import { CountChart, ProportionChart } from '../components/Charts';
 import { useData } from '../context/DataContext';
-import { useSettings } from '../context/SettingsContext';
 import { TIPOS, fmtDateTime, fmtTime } from '../utils/format';
 
 export default function Dashboard() {
-  const { status, leituras, alertas } = useData();
-  const { limiar } = useSettings();
-  const total = status ? status.totalMetalicas + status.totalNaoMetalicas : 0;
-  const pct = (v) => (total ? `${((v / total) * 100).toFixed(0)}% do total` : '');
+  const { status, leituras, ultima, totalMetalicas, totalNaoMetalicas } = useData();
+  const total = totalMetalicas + totalNaoMetalicas;
 
   return (
     <>
       <PageHeader
         title="Painel da esteira"
-        subtitle={status ? `${status.nome} · última leitura ${fmtDateTime(status.ultimaLeitura)}` : 'Monitoramento em tempo quase real'}
+        subtitle={status ? `Última leitura em ${fmtDateTime(status.ultimaLeitura ?? ultima?.timestamp)}` : 'Monitoramento em tempo quase real'}
       >
         {status && (
           <Badge bg={status.operando ? 'success' : 'secondary'} className="align-self-center">
@@ -33,63 +29,49 @@ export default function Dashboard() {
       <DataGate>
         {status && (
           <>
-            <Row className="g-3 mb-3">
-              <Col xs={12} sm={6} xl={3}>
-                <KpiCard icon="bi-magnet" label="Peças metálicas (hoje)" value={status.totalMetalicas} hint={pct(status.totalMetalicas)} color={TIPOS.METALICA.color} />
-              </Col>
-              <Col xs={12} sm={6} xl={3}>
-                <KpiCard icon="bi-box" label="Peças não metálicas (hoje)" value={status.totalNaoMetalicas} hint={pct(status.totalNaoMetalicas)} color={TIPOS.NAO_METALICA.color} />
-              </Col>
-              <Col xs={12} sm={6} xl={3}>
-                <KpiCard icon="bi-boxes" label="Total contado (hoje)" value={total} hint="Sensor de distância" />
-              </Col>
-              <Col xs={12} sm={6} xl={3}>
-                <KpiCard icon="bi-bell" label="Alertas no período" value={alertas.length} hint={`Janela de ${leituras.length} leituras`} color="var(--mt-amber)" />
-              </Col>
-            </Row>
+            {ultima && (
+              <Row className="g-3 mb-3">
+                <Col md={4}>
+                  <SensorCard nome="indutivo" icon="bi-magnet" color={TIPOS.METALICA.color} raw={ultima.raw.indutivo}
+                    valor={ultima.indutivo} modo="presenca" textoOn="Metal detectado" textoOff="Sem metal" />
+                </Col>
+                <Col md={4}>
+                  <SensorCard nome="capacitivo" icon="bi-box" color={TIPOS.NAO_METALICA.color} raw={ultima.raw.capacitivo}
+                    valor={ultima.capacitivo} modo="presenca" textoOn="Material detectado" textoOff="Livre" />
+                </Col>
+                <Col md={4}>
+                  <SensorCard nome="de distância" icon="bi-rulers" color="var(--mt-steel)" raw={ultima.raw.distancia}
+                    valor={ultima.distancia} modo="medida" />
+                </Col>
+              </Row>
+            )}
 
             <Row className="g-3 mb-3">
-              <Col lg={4}>
-                <Panel title="Reservatório de saída">
-                  <ReservoirTank nivel={status.nivelReservatorio} limiar={limiar} />
-                </Panel>
-              </Col>
-              <Col lg={8}>
-                <Panel title="Nível do reservatório ao longo do tempo">
-                  <LevelChart leituras={leituras} limiar={limiar} />
-                </Panel>
-              </Col>
+              <Col sm={4}><KpiCard icon="bi-magnet" label="Metálicas" value={totalMetalicas} color={TIPOS.METALICA.color} /></Col>
+              <Col sm={4}><KpiCard icon="bi-box" label="Não metálicas" value={totalNaoMetalicas} color={TIPOS.NAO_METALICA.color} /></Col>
+              <Col sm={4}><KpiCard icon="bi-boxes" label="Total de peças" value={total} /></Col>
             </Row>
 
             <Row className="g-3">
-              <Col lg={4}>
-                <Panel title="Metálicas × não metálicas">
-                  <ProportionChart metalicas={status.totalMetalicas} naoMetalicas={status.totalNaoMetalicas} />
-                </Panel>
-              </Col>
-              <Col lg={4}>
+              <Col lg={8}><Panel title="Contagem acumulada por tipo"><CountChart leituras={leituras} /></Panel></Col>
+              <Col lg={4}><Panel title="Metálicas × não metálicas"><ProportionChart metalicas={totalMetalicas} naoMetalicas={totalNaoMetalicas} /></Panel></Col>
+              <Col xs={12}>
                 <Panel title="Últimas leituras">
                   <div className="table-wrap">
                     <Table size="sm" className="mb-2 align-middle">
-                      <thead><tr><th>Hora</th><th>Peça</th><th className="text-end">Nível</th></tr></thead>
+                      <thead><tr><th>Hora</th><th>Peça</th><th>Indutivo</th><th>Capacitivo</th><th>Distância</th></tr></thead>
                       <tbody>
                         {[...leituras].reverse().slice(0, 6).map((l) => (
                           <tr key={l.id}>
                             <td>{fmtTime(l.timestamp)}</td>
-                            <td>{TIPOS[l.tipoPeca].label}</td>
-                            <td className="text-end">{l.nivelReservatorio}%</td>
+                            <td>{l.tipoPeca ? TIPOS[l.tipoPeca].label : 'Sem peça'}</td>
+                            <td>{l.indutivo}</td><td>{l.capacitivo}</td><td>{l.distancia}</td>
                           </tr>
                         ))}
                       </tbody>
                     </Table>
                   </div>
                   <Link to="/leituras">Ver todas as leituras</Link>
-                </Panel>
-              </Col>
-              <Col lg={4}>
-                <Panel title="Alertas recentes">
-                  <AlertList alertas={alertas.slice(0, 3)} />
-                  {alertas.length > 3 && <Link to="/alertas">Ver todos os alertas</Link>}
                 </Panel>
               </Col>
             </Row>

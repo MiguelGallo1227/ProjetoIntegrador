@@ -4,14 +4,18 @@ import PageHeader from '../components/PageHeader';
 import DataGate from '../components/DataGate';
 import Panel from '../components/Panel';
 import { useData } from '../context/DataContext';
-import { useSettings } from '../context/SettingsContext';
-import { TIPOS, fmtDateTime, nivelTone } from '../utils/format';
+import { TIPOS, fmtDateTime } from '../utils/format';
+import { rawLabel } from '../utils/sensors';
 
 const PAGE_SIZE = 15;
+const cell = (l, k) => (
+  <>
+    {l[k] ?? '–'} <small className="text-secondary">({rawLabel(l.raw[k], l[k])})</small>
+  </>
+);
 
 export default function Leituras() {
   const { leituras } = useData();
-  const { limiar } = useSettings();
   const [tipo, setTipo] = useState('TODOS');
   const [pagina, setPagina] = useState(1);
 
@@ -24,8 +28,9 @@ export default function Leituras() {
   const visiveis = filtradas.slice((atual - 1) * PAGE_SIZE, atual * PAGE_SIZE);
 
   const exportarCsv = () => {
-    const linhas = ['id;data_hora;tipo_peca;nivel_reservatorio'];
-    filtradas.forEach((l) => linhas.push(`${l.id};${l.timestamp};${l.tipoPeca};${l.nivelReservatorio}`));
+    const linhas = ['id;data_hora;indutivo;capacitivo;distancia;tipo_peca'];
+    filtradas.forEach((l) =>
+      linhas.push(`${l.id};${l.timestamp};${l.indutivo};${l.capacitivo};${l.distancia};${l.tipoPeca ?? ''}`));
     const url = URL.createObjectURL(new Blob([linhas.join('\n')], { type: 'text/csv;charset=utf-8' }));
     const a = document.createElement('a');
     a.href = url;
@@ -36,7 +41,7 @@ export default function Leituras() {
 
   return (
     <>
-      <PageHeader title="Leituras" subtitle="Histórico de peças classificadas e nível do reservatório">
+      <PageHeader title="Leituras" subtitle="Valores dos três sensores (convertidos de hexadecimal) e peça classificada">
         <Button variant="outline-primary" size="sm" onClick={exportarCsv} disabled={!filtradas.length}>
           <i className="bi bi-download me-1" aria-hidden="true" />Exportar CSV
         </Button>
@@ -57,20 +62,19 @@ export default function Leituras() {
           </Row>
           <div className="table-wrap">
             <Table hover size="sm" className="align-middle">
-              <thead><tr><th>#</th><th>Data e hora</th><th>Peça</th><th className="text-end">Nível</th></tr></thead>
+              <thead><tr><th>#</th><th>Data e hora</th><th>Indutivo</th><th>Capacitivo</th><th>Distância</th><th>Peça</th></tr></thead>
               <tbody>
                 {visiveis.map((l) => (
                   <tr key={l.id}>
                     <td>{l.id}</td>
                     <td>{fmtDateTime(l.timestamp)}</td>
-                    <td>
-                      <span className="me-2" style={{ color: TIPOS[l.tipoPeca].color }} aria-hidden="true">●</span>
-                      {TIPOS[l.tipoPeca].label}
-                    </td>
-                    <td className={`text-end text-${nivelTone(l.nivelReservatorio, limiar)}`}>{l.nivelReservatorio}%</td>
+                    <td>{cell(l, 'indutivo')}</td>
+                    <td>{cell(l, 'capacitivo')}</td>
+                    <td>{cell(l, 'distancia')}</td>
+                    <td>{l.tipoPeca ? TIPOS[l.tipoPeca].label : 'Sem peça'}</td>
                   </tr>
                 ))}
-                {!visiveis.length && <tr><td colSpan={4} className="text-center text-secondary py-4">Nenhuma leitura para este filtro.</td></tr>}
+                {!visiveis.length && <tr><td colSpan={6} className="text-center text-secondary py-4">Nenhuma leitura para este filtro.</td></tr>}
               </tbody>
             </Table>
           </div>

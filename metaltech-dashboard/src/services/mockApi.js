@@ -1,8 +1,7 @@
-// API simulada (deterministica por tempo) para desenvolver sem o back-end.
-// Segue o mesmo contrato da API REST real (ver README).
+// API simulada para desenvolver sem o back-end. Os sensores saem em hexadecimal, como no CLP.
 const STEP = 30000; // uma peca a cada 30 s
-const CYCLE = 55; // pecas ate esvaziar o reservatorio
 const delay = (ms = 250) => new Promise((r) => setTimeout(r, ms));
+const hex = (n) => `0x${n.toString(16).toUpperCase().padStart(4, '0')}`;
 
 function hash(n) {
   let x = (n * 2654435761) >>> 0;
@@ -12,18 +11,9 @@ function hash(n) {
   return (x >>> 0) / 4294967295;
 }
 
-const tipo = (i) => (hash(i) < 0.62 ? 'METALICA' : 'NAO_METALICA');
+const metalica = (i) => hash(i) < 0.62;
 
-function nivel(i) {
-  const cycle = Math.floor(i / CYCLE);
-  const pos = i % CYCLE;
-  const anomalo = cycle % 4 === 3; // ciclos com enchimento acelerado
-  const burst = anomalo ? Math.min(Math.max(pos - 20, 0), 8) * 2.2 : 0;
-  const ruido = (hash(i + 7) - 0.5) * 0.6;
-  return Math.min(100, Math.max(0, pos * 1.75 + burst + ruido + 4));
-}
-
-export async function getLeituras(limite = 200) {
+export async function getLeituras(limite = 100) {
   await delay();
   const now = Math.floor(Date.now() / STEP);
   return Array.from({ length: limite }, (_, k) => {
@@ -31,8 +21,9 @@ export async function getLeituras(limite = 200) {
     return {
       id: i,
       timestamp: new Date(i * STEP).toISOString(),
-      tipoPeca: tipo(i),
-      nivelReservatorio: Number(nivel(i).toFixed(1)),
+      indutivo: hex(metalica(i) ? 1 : 0),
+      capacitivo: hex(1),
+      distancia: hex(Math.round(40 + hash(i + 3) * 260)),
     };
   });
 }
@@ -41,19 +32,11 @@ export async function getStatus() {
   await delay();
   const now = Math.floor(Date.now() / STEP);
   const inicioDia = Math.floor(new Date().setHours(0, 0, 0, 0) / STEP);
-  let metalicas = 0;
-  let naoMetalicas = 0;
+  let m = 0;
+  let n = 0;
   for (let i = inicioDia; i <= now; i += 1) {
-    if (tipo(i) === 'METALICA') metalicas += 1;
-    else naoMetalicas += 1;
+    if (metalica(i)) m += 1;
+    else n += 1;
   }
-  return {
-    esteiraId: 'ESTEIRA-01',
-    nome: 'Esteira de triagem 01',
-    operando: true,
-    ultimaLeitura: new Date(now * STEP).toISOString(),
-    totalMetalicas: metalicas,
-    totalNaoMetalicas: naoMetalicas,
-    nivelReservatorio: Number(nivel(now).toFixed(1)),
-  };
+  return { nome: 'Esteira de triagem', operando: true, ultimaLeitura: new Date(now * STEP).toISOString(), totalMetalicas: m, totalNaoMetalicas: n };
 }
