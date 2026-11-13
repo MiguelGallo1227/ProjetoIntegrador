@@ -2,6 +2,7 @@ package com.senai.ProjetoInterdisciplinar.controller;
 
 import com.senai.ProjetoInterdisciplinar.DTO.EsteiraStatusDTO;
 import com.senai.ProjetoInterdisciplinar.DTO.LeituraDTO;
+import com.senai.ProjetoInterdisciplinar.DTO.LeituraSensorDTO;
 import com.senai.ProjetoInterdisciplinar.DTO.PortaLeituraDTO;
 import com.senai.ProjetoInterdisciplinar.service.EsteiraService;
 import lombok.RequiredArgsConstructor;
@@ -33,5 +34,12 @@ public class EsteiraController {
     @GetMapping("/iolink/portas")
     public List<PortaLeituraDTO> portas() {
         return service.portasAoVivo();
+    }
+
+    /** Historico gravado no banco: o que chegou dos sensores (filtre por porta se quiser). */
+    @GetMapping("/iolink/historico")
+    public List<LeituraSensorDTO> historico(@RequestParam(required = false) Integer porta,
+                                            @RequestParam(defaultValue = "100") int limite) {
+        return service.historico(porta, limite);
     }
 }

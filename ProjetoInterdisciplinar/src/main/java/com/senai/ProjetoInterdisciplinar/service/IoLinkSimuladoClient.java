@@ -9,7 +9,7 @@ import java.util.HexFormat;
 
 /**
  * Gera process data falso, no mesmo formato configurado para cada porta.
- * Uma peca a cada 3 s (pulso de 0,7 s) e o reservatorio enchendo ate esvaziar.
+ * Uma peca a cada 3 s (pulso de 0,7 s; metalica ativa indutivo e capacitivo, as outras so o capacitivo) e o reservatorio enchendo ate esvaziar.
  * Ative com iolink.simulado=true.
  */
 @Service
@@ -33,18 +33,32 @@ public class IoLinkSimuladoClient implements IoLinkClient {
 
         byte[] buf = new byte[Math.max(2, p.getByteIndex() + Math.max(1, p.getTamanhoBytes()))];
         switch (p.getFuncao()) {
-            case PECA_METALICA -> definirBit(buf, p, pulso && metalica);
-            case PECA_NAO_METALICA -> definirBit(buf, p, pulso && !metalica);
+            case SENSOR_INDUTIVO -> definirSensor(buf, p, pulso && metalica);
+            case SENSOR_CAPACITIVO -> definirSensor(buf, p, pulso);
             case NIVEL_RESERVATORIO -> {
                 double pct = Math.min(100, 4 + (slot % 55) * 1.8);
                 long raw = Math.round(p.getValorVazio() + pct / 100.0 * (p.getValorCheio() - p.getValorVazio()));
-                int tam = Math.max(1, p.getTamanhoBytes());
-                for (int i = 0; i < tam; i++) {
-                    buf[p.getByteIndex() + tam - 1 - i] = (byte) (raw >> (8 * i));
-                }
+                escrever(buf, p, raw);
             }
         }
         return HexFormat.of().withUpperCase().formatHex(buf);
+    }
+
+    /** Sensor com limiar: escreve um valor acima (ativo) ou bem abaixo (livre) do limiar. */
+    private void definirSensor(byte[] buf, IoLinkProperties.Porta p, boolean ativo) {
+        if (p.getLimiar() == null) {
+            definirBit(buf, p, ativo);
+            return;
+        }
+        boolean acima = ativo != p.isInvertido();
+        escrever(buf, p, Math.round(acima ? p.getLimiar() * 1.5 : p.getLimiar() * 0.1));
+    }
+
+    private void escrever(byte[] buf, IoLinkProperties.Porta p, long raw) {
+        int tam = Math.max(1, p.getTamanhoBytes());
+        for (int i = 0; i < tam; i++) {
+            buf[p.getByteIndex() + tam - 1 - i] = (byte) (raw >> (8 * i));
+        }
     }
 
     private void definirBit(byte[] buf, IoLinkProperties.Porta p, boolean ativo) {

@@ -24,8 +24,14 @@ public class IoLinkDecoder {
         }
     }
 
-    /** Sensor digital: le o bit configurado (e inverte se "invertido"). */
+    /**
+     * Sensor de peca. Com "limiar", esta ativo quando o valor analogico e maior ou igual a ele;
+     * sem "limiar", le o bit configurado. "invertido" troca o resultado.
+     */
     public boolean estadoAtivo(byte[] dados, Porta p) {
+        if (p.getLimiar() != null) {
+            return (valorBruto(dados, p) >= p.getLimiar()) != p.isInvertido();
+        }
         if (p.getBitIndex() < 0 || p.getBitIndex() > 7) {
             throw new IoLinkException("bit-index deve ficar entre 0 e 7 (porta " + p.getNumero() + ")");
         }
@@ -64,6 +70,18 @@ public class IoLinkDecoder {
         double pct = (valorBruto(dados, p) - p.getValorVazio()) / faixa * 100.0;
         pct = Math.max(0, Math.min(100, pct));
         return Math.round(pct * 10) / 10.0;
+    }
+
+    /** Bits de cada byte, para descobrir em qual bit o sensor muda. Ex.: "00000000 00000001". */
+    public String binario(byte[] dados) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < dados.length; i++) {
+            if (i > 0) {
+                sb.append(' ');
+            }
+            sb.append(String.format("%8s", Integer.toBinaryString(dados[i] & 0xFF)).replace(' ', '0'));
+        }
+        return sb.toString();
     }
 
     private void verificarTamanho(byte[] dados, int inicio, int tam, Porta p) {

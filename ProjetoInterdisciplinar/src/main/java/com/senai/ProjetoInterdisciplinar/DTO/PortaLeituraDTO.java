@@ -4,7 +4,9 @@ import com.senai.ProjetoInterdisciplinar.entity.FuncaoPorta;
 import lombok.Builder;
 import lombok.Getter;
 
-/** Leitura ao vivo de uma porta (GET /api/iolink/portas), util para calibrar os sensores. */
+import java.time.Instant;
+
+/** Ultima leitura de uma porta do mestre IO-Link (GET /api/iolink/portas). */
 @Getter
 @Builder
 public class PortaLeituraDTO {
@@ -12,11 +14,16 @@ public class PortaLeituraDTO {
     private final String nome;
     private final FuncaoPorta funcao;
     private final boolean disponivel;
-    /** Process data bruto em hexadecimal. */
+    /** Process data bruto em hexadecimal, exatamente como veio do mestre. */
     private final String hex;
-    /** Preenchido para sensores de peca. */
+    /** O mesmo dado em binario (bit 0 = o mais a direita de cada byte). */
+    private final String binario;
+    /** Sensor de peca: true = detectando. */
     private final Boolean ativo;
-    /** Preenchido para o sensor de nivel (0..100). */
+    /** Sensor de distancia/nivel: valor bruto em decimal (ex.: distancia em mm). */
+    private final Long valorBruto;
+    /** Sensor de nivel: 0..100 %. */
     private final Double nivelPercentual;
     private final String erro;
+    private final Instant atualizadoEm;
 }

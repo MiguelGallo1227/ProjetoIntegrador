@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mestre IO-Link - ao vivo</title>
+<style>
+  body { font-family: system-ui, sans-serif; margin: 24px; background: #f5f6f8; color: #1d2330; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  .sub { color: #5b6475; margin-bottom: 16px; font-size: .9rem; }
+  .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+  .card { background: #fff; border-radius: 8px; padding: 12px 16px; min-width: 150px; box-shadow: 0 1px 3px #0002; }
+  .card b { display: block; font-size: 1.6rem; }
+  table { border-collapse: collapse; width: 100%; background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px #0002; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e6e8ee; }
+  th { background: #eceef3; font-size: .85rem; }
+  .hex { font-family: ui-monospace, Consolas, monospace; }
+  .ok { color: #137a3a; font-weight: 600; } .off { color: #b3261e; font-weight: 600; }
+</style>
+</head>
+<body>
+<h1>Mestre IO-Link - leitura ao vivo</h1>
+<div class="sub" id="estado">Conectando...</div>
+
+<div class="cards">
+  <div class="card">Metalicas hoje<b id="metalicas">-</b></div>
+  <div class="card">Nao metalicas hoje<b id="naoMetalicas">-</b></div>
+  <div class="card">Nivel do reservatorio<b id="nivel">-</b></div>
+  <div class="card">Esteira<b id="operando">-</b></div>
+</div>
+
+<table>
+  <thead><tr><th>Porta</th><th>Sensor</th><th>Hex</th><th>Binario</th><th>Valor</th><th>Atualizado</th></tr></thead>
+  <tbody id="corpo"></tbody>
+</table>
+
+<script>
+function celula(tr, texto, classe) {
+  const td = document.createElement('td');
+  td.textContent = texto;
+  if (classe) td.className = classe;
+  tr.appendChild(td);
+}
+
+function valorDaPorta(p) {
+  if (!p.disponivel) return 'ERRO: ' + p.erro;
+  if (p.funcao === 'NIVEL_RESERVATORIO') return p.valorBruto + ' (bruto)  =  ' + p.nivelPercentual + ' %';
+  const extra = p.valorBruto != null ? '  (' + p.valorBruto + ')' : '';
+  return (p.ativo ? 'DETECTANDO' : 'livre') + extra;
+}
+
+async function atualizar() {
+  try {
+    const [portas, status] = await Promise.all([
+      fetch('/api/iolink/portas').then(r => r.json()),
+      fetch('/api/esteira/status').then(r => r.json())
+    ]);
+
+    document.getElementById('metalicas').textContent = status.totalMetalicas;
+    document.getElementById('naoMetalicas').textContent = status.totalNaoMetalicas;
+    document.getElementById('nivel').textContent = status.nivelReservatorio.toFixed(1) + ' %';
+    document.getElementById('operando').textContent = status.operando ? 'Operando' : 'Parada';
+
+    const corpo = document.getElementById('corpo');
+    corpo.replaceChildren();
+    portas.forEach(p => {
+      const tr = document.createElement('tr');
+      celula(tr, p.porta);
+      celula(tr, p.nome);
+      celula(tr, p.hex || '-', 'hex');
+      celula(tr, p.binario || '-', 'hex');
+      celula(tr, valorDaPorta(p), p.disponivel ? 'ok' : 'off');
+      celula(tr, p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleTimeString() : '-');
+      corpo.appendChild(tr);
+    });
+    document.getElementById('estado').textContent = 'Atualizando a cada 1 s';
+  } catch (e) {
+    document.getElementById('estado').textContent = 'Sem resposta da API';
+  }
+}
+atualizar();
+setInterval(atualizar, 1000);
+</script>
+</body>
+</html>

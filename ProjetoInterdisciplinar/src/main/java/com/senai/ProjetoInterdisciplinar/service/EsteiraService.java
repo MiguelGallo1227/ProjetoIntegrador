@@ -2,13 +2,13 @@ package com.senai.ProjetoInterdisciplinar.service;
 
 import com.senai.ProjetoInterdisciplinar.DTO.EsteiraStatusDTO;
 import com.senai.ProjetoInterdisciplinar.DTO.LeituraDTO;
+import com.senai.ProjetoInterdisciplinar.DTO.LeituraSensorDTO;
 import com.senai.ProjetoInterdisciplinar.DTO.PortaLeituraDTO;
 import com.senai.ProjetoInterdisciplinar.config.IoLinkProperties;
-import com.senai.ProjetoInterdisciplinar.config.IoLinkProperties.Porta;
-import com.senai.ProjetoInterdisciplinar.entity.FuncaoPorta;
 import com.senai.ProjetoInterdisciplinar.entity.Leitura;
 import com.senai.ProjetoInterdisciplinar.entity.TipoPeca;
 import com.senai.ProjetoInterdisciplinar.repostory.LeituraRepository;
+import com.senai.ProjetoInterdisciplinar.repostory.LeituraSensorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
@@ -29,10 +29,9 @@ public class EsteiraService {
     private static final int LIMITE_MAXIMO = 1000;
 
     private final LeituraRepository repository;
+    private final LeituraSensorRepository sensorRepository;
     private final ColetaService coleta;
     private final IoLinkProperties props;
-    private final IoLinkClient client;
-    private final IoLinkDecoder decoder;
 
     @Value("${app.esteira.id:ESTEIRA-01}")
     private String esteiraId;
@@ -75,28 +74,17 @@ public class EsteiraService {
         return recentes.stream().map(LeituraDTO::de).toList();
     }
 
-    /** Le as portas agora, sem salvar nada. Serve para conferir a configuracao dos sensores. */
-    public List<PortaLeituraDTO> portasAoVivo() {
-        return props.getPortas().stream().map(this::lerPorta).toList();
+    /** Historico do que chegou dos sensores, do mais recente para o mais antigo. */
+    public List<LeituraSensorDTO> historico(Integer porta, int limite) {
+        PageRequest pagina = PageRequest.of(0, Math.min(Math.max(limite, 1), LIMITE_MAXIMO));
+        List<com.senai.ProjetoInterdisciplinar.entity.LeituraSensor> lista = porta == null
+                ? sensorRepository.findAllByOrderByDataHoraDesc(pagina)
+                : sensorRepository.findByPortaOrderByDataHoraDesc(porta, pagina);
+        return lista.stream().map(LeituraSensorDTO::de).toList();
     }
 
-    private PortaLeituraDTO lerPorta(Porta p) {
-        var b = PortaLeituraDTO.builder()
-                .porta(p.getNumero())
-                .nome(p.getNome())
-                .funcao(p.getFuncao());
-        try {
-            String hex = client.lerPdin(p.getNumero());
-            byte[] dados = decoder.hexParaBytes(hex);
-            b.disponivel(true).hex(hex);
-            if (p.getFuncao() == FuncaoPorta.NIVEL_RESERVATORIO) {
-                b.nivelPercentual(decoder.nivelPercentual(dados, p));
-            } else {
-                b.ativo(decoder.estadoAtivo(dados, p));
-            }
-        } catch (RuntimeException e) {
-            b.disponivel(false).erro(e.getMessage());
-        }
-        return b.build();
+    /** Ultima leitura de cada porta, atualizada continuamente pelo ColetaService. */
+    public List<PortaLeituraDTO> portasAoVivo() {
+        return coleta.getUltimasLeituras();
     }
 }
