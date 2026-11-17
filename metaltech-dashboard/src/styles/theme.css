@@ -36,31 +36,14 @@ h1, h2, h3, h4, h5, .brand, .kpi-value {
 .kpi-value { font-size: 2.3rem; font-weight: 700; line-height: 1.1; font-variant-numeric: tabular-nums; }
 .kpi-hint { font-size: 0.82rem; color: var(--bs-secondary-color); }
 
-/* Reservatorio: elemento central do painel */
-.tank-wrap { display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; }
-.tank { position: relative; width: 120px; height: 250px; border: 3px solid var(--mt-steel); border-radius: 10px 10px 18px 18px; overflow: hidden; background: var(--bs-tertiary-bg); flex: none; }
-.tank-fill { position: absolute; left: 0; right: 0; bottom: 0; transition: height 0.8s ease, background-color 0.4s; }
-.tank-fill.tone-success { background: #3a9d6e; }
-.tank-fill.tone-warning { background: var(--mt-amber); }
-.tank-fill.tone-danger { background: #d0453b; }
-.tank-limit { position: absolute; left: 0; right: 0; border-top: 2px dashed var(--bs-body-color); opacity: 0.75; }
-.tank-limit span { position: absolute; right: 4px; top: 2px; font-size: 0.7rem; background: var(--bs-body-bg); padding: 0 3px; border-radius: 3px; }
-.tank-readout { font-family: 'Barlow Semi Condensed', sans-serif; font-size: 3.4rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
-
 .status-pill { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.25rem 0.7rem; border-radius: 999px; font-size: 0.82rem; color: #fff; background: rgba(255, 255, 255, 0.12); }
 .status-dot { width: 9px; height: 9px; border-radius: 50%; background: #9aa7b1; }
 .status-dot.live { background: #46c28a; }
 .status-dot.demo { background: var(--mt-amber); }
 .status-dot.off { background: #e0594e; }
 
-.alert-row { display: flex; gap: 0.75rem; padding: 0.65rem 0; border-bottom: 1px solid var(--bs-border-color); }
-.alert-row:last-child { border-bottom: 0; }
-.alert-row i { font-size: 1.2rem; }
 
-.stat-table th { font-weight: 500; color: var(--bs-secondary-color); width: 55%; }
-.stat-table td { font-variant-numeric: tabular-nums; text-align: right; }
 
 .table-wrap { overflow-x: auto; }
 :focus-visible { outline: 3px solid var(--mt-amber); outline-offset: 2px; }
-@media (prefers-reduced-motion: reduce) { .tank-fill { transition: none; } }
 @media (max-width: 575px) { .page-title { font-size: 1.5rem; } .kpi-value { font-size: 1.9rem; } }

@@ -7,8 +7,6 @@ import com.senai.ProjetoInterdisciplinar.DTO.LeituraDTO;
 import com.senai.ProjetoInterdisciplinar.DTO.LeituraSensorDTO;
 import com.senai.ProjetoInterdisciplinar.DTO.PortaLeituraDTO;
 import com.senai.ProjetoInterdisciplinar.config.IoLinkProperties;
-import com.senai.ProjetoInterdisciplinar.config.IoLinkProperties.Porta;
-import com.senai.ProjetoInterdisciplinar.entity.FuncaoPorta;
 import com.senai.ProjetoInterdisciplinar.entity.Leitura;
 import com.senai.ProjetoInterdisciplinar.entity.TipoPeca;
 import com.senai.ProjetoInterdisciplinar.repostory.LeituraRepository;
@@ -36,9 +34,12 @@ public class EsteiraService {
     private final LeituraRepository repository;
     private final LeituraSensorRepository sensorRepository;
     private final ColetaService coleta;
+<<<<<<< HEAD
     private final ClassificadorPeca classificador;
     private final IoLinkDecoder decoder;
     private final DetectorAnalogico detector;
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     private final IoLinkProperties props;
 
     @Value("${app.esteira.id:ESTEIRA-01}")
@@ -94,6 +95,7 @@ public class EsteiraService {
     /** Ultima leitura de cada porta, atualizada continuamente pelo ColetaService. */
     public List<PortaLeituraDTO> portasAoVivo() {
         return coleta.getUltimasLeituras();
+<<<<<<< HEAD
     }
 
     /** Responde: os dados estao chegando? estao sendo gravados? */
@@ -263,5 +265,7 @@ public class EsteiraService {
             return (valor >= cfg.getLimiar()) != cfg.isInvertido();
         }
         throw new IoLinkException("A porta " + cfg.getNumero() + " nao tem delta nem limiar configurado");
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     }
 }

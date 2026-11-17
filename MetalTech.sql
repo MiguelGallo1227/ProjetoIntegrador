@@ -1,12 +1,18 @@
+<<<<<<< HEAD
 -- MetalTech - banco de dados do projeto (MySQL)
 -- Opcional: o Spring Boot ja cria tudo sozinho ao iniciar (ddl-auto=update).
 -- Use este script se quiser criar o banco antes, pelo MySQL Workbench.
+=======
+
+
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
 
 CREATE DATABASE IF NOT EXISTS metaltech
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE metaltech;
 
+<<<<<<< HEAD
 -- ---------------------------------------------------------------
 -- Se voce ja rodou uma versao antiga do projeto, descomente estas
 -- duas linhas UMA vez para recomear com as tabelas limpas:
@@ -16,6 +22,9 @@ USE metaltech;
 
 -- Uma linha por peca que terminou de passar pela esteira
 -- (indutivo pegou = METALICA; so o capacitivo pegou = NAO_METALICA)
+=======
+-- Uma linha por peca que passou na esteira
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
 CREATE TABLE IF NOT EXISTS leitura (
   id                 BIGINT       NOT NULL AUTO_INCREMENT,
   data_hora          DATETIME(6)  NOT NULL,
@@ -29,19 +38,27 @@ CREATE TABLE IF NOT EXISTS leitura (
   INDEX idx_leitura_data_hora (data_hora)
 );
 
+<<<<<<< HEAD
 -- Se a tabela "leitura" ja existia sem essas 4 colunas, o Spring as adiciona sozinho ao subir.
 -- Para adicionar pelo Workbench:
 -- ALTER TABLE leitura ADD COLUMN hex_indutivo VARCHAR(16) NULL, ADD COLUMN valor_indutivo BIGINT NULL,
 --   ADD COLUMN hex_capacitivo VARCHAR(16) NULL, ADD COLUMN valor_capacitivo BIGINT NULL;
 
 -- Historico do sensor de distancia (porta 1), uma linha a cada 10 s
+=======
+-- Historico do que chegou de cada porta do mestre IO-Link
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
 CREATE TABLE IF NOT EXISTS leitura_sensor (
   id               BIGINT       NOT NULL AUTO_INCREMENT,
   data_hora        DATETIME(6)  NOT NULL,
   porta            INT          NOT NULL,     -- 1, 2 ou 3
   funcao           VARCHAR(30)  NOT NULL,     -- NIVEL_RESERVATORIO, SENSOR_INDUTIVO, SENSOR_CAPACITIVO
   hex              VARCHAR(64)  NOT NULL,     -- process data como chegou do mestre
+<<<<<<< HEAD
   valor_bruto      BIGINT       NULL,         -- valor em decimal (ex.: distancia)
+=======
+  valor_bruto      BIGINT       NULL,         -- distancia em decimal (porta de nivel)
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
   ativo            BIT          NULL,         -- sensor de peca detectando
   nivel_percentual DOUBLE       NULL,         -- 0 a 100 (%)
   PRIMARY KEY (id),
@@ -50,5 +67,9 @@ CREATE TABLE IF NOT EXISTS leitura_sensor (
 
 -- Para conferir os dados:
 -- SELECT * FROM leitura_sensor ORDER BY data_hora DESC LIMIT 20;
+<<<<<<< HEAD
 -- SELECT data_hora, tipo_peca, hex_indutivo, valor_indutivo, hex_capacitivo, valor_capacitivo FROM leitura ORDER BY data_hora DESC LIMIT 20;
 -- SELECT tipo_peca, COUNT(*) FROM leitura GROUP BY tipo_peca;
+=======
+-- SELECT * FROM leitura ORDER BY data_hora DESC LIMIT 20;
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466

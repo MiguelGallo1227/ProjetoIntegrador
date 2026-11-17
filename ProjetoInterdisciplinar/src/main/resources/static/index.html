@@ -22,18 +22,28 @@
 <h1>Mestre IO-Link - leitura ao vivo</h1>
 <div class="sub" id="estado">Conectando...</div>
 
+<<<<<<< HEAD
 <div class="card" id="diag" style="margin-bottom:16px; white-space:pre-line">Verificando...</div>
 
 <div class="cards">
   <div class="card">Metalicas hoje<b id="metalicas">-</b></div>
   <div class="card">Nao metalicas hoje<b id="naoMetalicas">-</b></div>
   <div class="card">Classificacao agora<b id="classe">-</b></div>
+=======
+<div class="cards">
+  <div class="card">Metalicas hoje<b id="metalicas">-</b></div>
+  <div class="card">Nao metalicas hoje<b id="naoMetalicas">-</b></div>
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
   <div class="card">Nivel do reservatorio<b id="nivel">-</b></div>
   <div class="card">Esteira<b id="operando">-</b></div>
 </div>
 
 <table>
+<<<<<<< HEAD
   <thead><tr><th>Porta</th><th>Sensor</th><th>Resposta da API</th><th>Hex</th><th>Binario</th><th>Decimal</th><th>Valor</th><th>Atualizado</th></tr></thead>
+=======
+  <thead><tr><th>Porta</th><th>Sensor</th><th>Hex</th><th>Binario</th><th>Valor</th><th>Atualizado</th></tr></thead>
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
   <tbody id="corpo"></tbody>
 </table>
 
@@ -48,12 +58,17 @@ function celula(tr, texto, classe) {
 function valorDaPorta(p) {
   if (!p.disponivel) return 'ERRO: ' + p.erro;
   if (p.funcao === 'NIVEL_RESERVATORIO') return p.valorBruto + ' (bruto)  =  ' + p.nivelPercentual + ' %';
+<<<<<<< HEAD
   const extra = p.valorBruto != null ? '  (' + p.valorBruto + (p.linhaBase != null ? ', livre = ' + Math.round(p.linhaBase) : '') + ')' : '';
+=======
+  const extra = p.valorBruto != null ? '  (' + p.valorBruto + ')' : '';
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
   return (p.ativo ? 'DETECTANDO' : 'livre') + extra;
 }
 
 async function atualizar() {
   try {
+<<<<<<< HEAD
     const [portas, status, diag, classe] = await Promise.all([
       fetch('/api/iolink/portas').then(r => r.json()),
       fetch('/api/esteira/status').then(r => r.json()),
@@ -73,6 +88,13 @@ async function atualizar() {
       'Ultima gravacao: ' + (diag.ultimaGravacaoOk ? new Date(diag.ultimaGravacaoOk).toLocaleTimeString() : '-') + '\n' +
       'Os sensores sao lidos a cada ~' + diag.periodoAmostragemMs + ' ms (peca mais rapida que isso pode passar sem ser vista)';
 
+=======
+    const [portas, status] = await Promise.all([
+      fetch('/api/iolink/portas').then(r => r.json()),
+      fetch('/api/esteira/status').then(r => r.json())
+    ]);
+
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     document.getElementById('metalicas').textContent = status.totalMetalicas;
     document.getElementById('naoMetalicas').textContent = status.totalNaoMetalicas;
     document.getElementById('nivel').textContent = status.nivelReservatorio.toFixed(1) + ' %';
@@ -84,10 +106,15 @@ async function atualizar() {
       const tr = document.createElement('tr');
       celula(tr, p.porta);
       celula(tr, p.nome);
+<<<<<<< HEAD
       celula(tr, p.resposta || '-', 'hex');
       celula(tr, p.hex || '-', 'hex');
       celula(tr, p.binario || '-', 'hex');
       celula(tr, p.valorBruto != null ? p.valorBruto : '-', 'hex');
+=======
+      celula(tr, p.hex || '-', 'hex');
+      celula(tr, p.binario || '-', 'hex');
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
       celula(tr, valorDaPorta(p), p.disponivel ? 'ok' : 'off');
       celula(tr, p.atualizadoEm ? new Date(p.atualizadoEm).toLocaleTimeString() : '-');
       corpo.appendChild(tr);

@@ -8,15 +8,3 @@ export const fmtTime = (iso) =>
 
 export const fmtDateTime = (iso) =>
   new Date(iso).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'medium' });
-
-export const fmtNum = (n, digits = 1) =>
-  Number(n).toLocaleString('pt-BR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-
-// success = normal | warning = perto do limite | danger = acima do limite de alerta
-export function nivelTone(nivel, limiar) {
-  if (nivel >= limiar) return 'danger';
-  if (nivel >= limiar - 15) return 'warning';
-  return 'success';
-}
-
-export const TONE_LABEL = { success: 'Normal', warning: 'Atenção', danger: 'Crítico' };

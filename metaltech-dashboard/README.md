@@ -1,46 +1,36 @@
 # MetalTech Dashboard (Frameworks Front-end)
 
-Dashboard web em **React + Vite** para monitorar a esteira de triagem: contagem de peças metálicas/não metálicas,
-nível do reservatório, análises estatísticas e alertas. Estilização com **Bootstrap 5 / React-Bootstrap**.
+Dashboard em **React + Vite** (Bootstrap 5 / React-Bootstrap) para a esteira de triagem: mostra os 3 sensores
+(indutivo, capacitivo e distância), a contagem de peças metálicas e não metálicas e o histórico de leituras.
 
 ## Como rodar
 ```bash
 npm install
-cp .env.example .env      # (Windows: copy .env.example .env)
+cp .env.example .env      # Windows: copy .env.example .env
 npm run dev               # http://localhost:5173
 ```
-Por padrão usa **dados simulados** (`VITE_USE_MOCK=true`). Para usar a API real, coloque `VITE_USE_MOCK=false`
-e `VITE_API_URL` com a URL do Spring Boot (ou ajuste em *Configurações* no próprio painel).
+Por padrão usa **dados simulados** (`VITE_USE_MOCK=true`). Para a API real: `VITE_USE_MOCK=false` e `VITE_API_URL=http://localhost:8080`.
 
-## Contrato da API REST (combinar com o Back-end)
+## Contrato da API (combinar com o Back-end)
 `GET /api/esteira/status`
 ```json
-{ "esteiraId": "ESTEIRA-01", "nome": "Esteira de triagem 01", "operando": true,
-  "ultimaLeitura": "2026-11-10T14:30:00Z", "totalMetalicas": 120, "totalNaoMetalicas": 74,
-  "nivelReservatorio": 63.5 }
+{ "nome": "Esteira de triagem", "operando": true, "ultimaLeitura": "2026-11-10T14:30:00Z",
+  "totalMetalicas": 120, "totalNaoMetalicas": 74 }
 ```
-`GET /api/leituras?limite=200` (ordem cronológica crescente)
+`GET /api/leituras?limite=100` (da mais antiga para a mais recente)
 ```json
-[ { "id": 1, "timestamp": "2026-11-10T14:29:30Z", "tipoPeca": "METALICA", "nivelReservatorio": 62.0 } ]
+[ { "id": 1, "timestamp": "2026-11-10T14:29:30Z", "indutivo": "0x0001", "capacitivo": "0x0001", "distancia": "0x00A3" } ]
 ```
-- `tipoPeca`: `METALICA` ou `NAO_METALICA`; `nivelReservatorio` em porcentagem (0–100).
-- O Spring Boot precisa liberar CORS para `http://localhost:5173` (`@CrossOrigin` ou `WebMvcConfigurer`).
-- Se o contrato mudar, ajuste apenas `src/services/api.js`.
+- Os sensores podem vir em **hexadecimal** (`"0x00A3"` ou `"00A3"`) ou já como número; o front converte (`src/utils/sensors.js`).
+- Classificação da peça: indutivo > 0 = **metálica**; só capacitivo > 0 = **não metálica**. Se o back mandar `tipoPeca` (`METALICA`/`NAO_METALICA`), ele tem prioridade.
+- Se `totalMetalicas`/`totalNaoMetalicas` não vierem no status, o front conta pelas leituras recebidas.
+- O Spring Boot precisa liberar CORS para `http://localhost:5173`.
 
 ## Estrutura
 ```
-src/
-  components/  NavBar, KpiCard, ReservoirTank, Charts, BoxPlot, AlertList, Panel, DataGate...
-  pages/       Dashboard, Analises, Leituras, Alertas, Configuracoes, NotFound
-  context/     SettingsContext (tema, API, limiar), DataContext (polling + alertas)
-  hooks/       usePolling
-  services/    api.js (REST), mockApi.js (simulação)
-  utils/       stats.js (estatística descritiva), alerts.js (critério de alerta), format.js
+src/components  NavBar, SensorCard, KpiCard, Charts, Panel, DataGate, StatusPill, PageHeader
+src/pages       Dashboard, Leituras, Configuracoes, NotFound
+src/context     SettingsContext (tema, API), DataContext (polling)
+src/services    api.js (REST), mockApi.js (simulação)
+src/utils       sensors.js (hex e classificação), format.js
 ```
-
-## Critérios do PDF atendidos
-- **Consome a API REST** com atualização periódica (padrão 5 s, configurável).
-- **Gráficos da Ciência de Dados**: linha (nível e contagem), pizza (proporção), histograma e boxplot; tabelas de média, mediana, moda, desvio padrão e quartis.
-- **Alerta**: nível acima do limiar e enchimento acelerado (outlier pela regra Q3 + 1,5 × IQR).
-- **Responsivo**, componentes reutilizáveis com props, estados (useState/Context), **rotas** (React Router) e **framework CSS** (Bootstrap).
-- Tema claro/escuro, estados de carregamento/erro, exportação de leituras em CSV.

@@ -68,6 +68,23 @@ public class IoLinkSimuladoClient implements IoLinkClient {
         }
     }
 
+    /** Sensor com limiar: escreve um valor acima (ativo) ou bem abaixo (livre) do limiar. */
+    private void definirSensor(byte[] buf, IoLinkProperties.Porta p, boolean ativo) {
+        if (p.getLimiar() == null) {
+            definirBit(buf, p, ativo);
+            return;
+        }
+        boolean acima = ativo != p.isInvertido();
+        escrever(buf, p, Math.round(acima ? p.getLimiar() * 1.5 : p.getLimiar() * 0.1));
+    }
+
+    private void escrever(byte[] buf, IoLinkProperties.Porta p, long raw) {
+        int tam = Math.max(1, p.getTamanhoBytes());
+        for (int i = 0; i < tam; i++) {
+            buf[p.getByteIndex() + tam - 1 - i] = (byte) (raw >> (8 * i));
+        }
+    }
+
     private void definirBit(byte[] buf, IoLinkProperties.Porta p, boolean ativo) {
         boolean bit = ativo != p.isInvertido();
         if (bit) {

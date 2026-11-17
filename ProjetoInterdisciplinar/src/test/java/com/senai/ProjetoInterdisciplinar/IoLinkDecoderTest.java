@@ -30,7 +30,11 @@ class IoLinkDecoderTest {
 
     @Test
     void sensorAnalogicoUsaLimiar() {
+<<<<<<< HEAD
         // valores medidos (hoje atribuidos ao CAPACITIVO): livre 022E (558), nao metalica 0A97 (2711), metalica 1EF1 (7921)
+=======
+        // indutivo medido: sem peca 022E (558), nao metalica 0A97 (2711), metalica 1EF1 (7921)
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
         Porta p = new Porta();
         p.setNumero(2);
         p.setByteIndex(0);
@@ -46,6 +50,7 @@ class IoLinkDecoderTest {
     }
 
     @Test
+<<<<<<< HEAD
     void hexParaDecimal() {
         Porta p = new Porta();
         p.setNumero(2);
@@ -57,6 +62,8 @@ class IoLinkDecoderTest {
     }
 
     @Test
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     void converterNivelParaPercentual() {
         Porta p = new Porta();
         p.setNumero(3);

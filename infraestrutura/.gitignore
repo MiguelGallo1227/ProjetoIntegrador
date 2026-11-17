@@ -1,0 +1,8 @@
+# Arquivo com senhas e configurações privadas
+.env
+
+# Arquivos temporários
+*.log
+
+# Dependências
+node_modules/

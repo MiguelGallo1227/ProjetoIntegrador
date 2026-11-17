@@ -25,11 +25,15 @@ public class IoLinkProperties {
     private long historicoMinMs = 10000;
     /** Grava tambem, a cada mudanca, os sensores de peca no historico (util so para depuracao). */
     private boolean historicoSensoresPeca = false;
+<<<<<<< HEAD
     /**
      * Tempo com os dois sensores livres para considerar que a peca terminou de passar. O valor efetivo
      * nunca fica abaixo de 2,5 ciclos de leitura: se o ciclo for mais longo que isso, uma peca seria
      * "fechada" entre duas leituras e o indutivo (janela curta) poderia cair em outra passagem.
      */
+=======
+    /** Tempo com os dois sensores livres para considerar que a peca terminou de passar. */
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     private long fimPecaMs = 300;
     /** Passagem mais longa que isso e tratada como sensor travado: conta uma peca e espera os sensores liberarem. */
     private long maxPecaMs = 5000;
@@ -63,6 +67,7 @@ public class IoLinkProperties {
          * Deixe sem valor para usar o bit-index (sensor que manda so um bit).
          */
         private Double limiar;
+<<<<<<< HEAD
 
         /**
          * Alternativa ao limiar fixo para sensores analogicos: o projeto aprende sozinho o valor
@@ -71,6 +76,8 @@ public class IoLinkProperties {
          * "delta" abaixo do valor livre (ex.: sensor que manda 32736 = fora de alcance e cai ao ver metal).
          */
         private Double delta;
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
         private int bitIndex = 0;
         /** Sensor em que a presenca faz o valor cair (vale para limiar, delta e bit). */
         private boolean invertido = false;

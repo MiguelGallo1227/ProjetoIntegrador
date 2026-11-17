@@ -24,11 +24,18 @@ import java.util.Optional;
 @Component
 public class ClassificadorPeca {
 
+<<<<<<< HEAD
     private volatile boolean passando;
     private volatile boolean aguardandoLiberar;
     private boolean indutivoPegou;
     private volatile Instant inicioPassagem;
     private volatile Instant pausadoDesde;
+=======
+    private boolean passando;
+    private boolean aguardandoLiberar;
+    private boolean indutivoPegou;
+    private Instant inicioPassagem;
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     private Instant ultimaAtividade;
 
     /** Chamar a cada ciclo de leitura. Devolve o tipo quando uma peca termina de passar. */
@@ -61,7 +68,10 @@ public class ClassificadorPeca {
                         maxPassagemMs, indutivoAtivo, capacitivoAtivo);
                 passando = false;
                 aguardandoLiberar = true;
+<<<<<<< HEAD
                 pausadoDesde = agora;
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
                 return Optional.of(tipoDaPassagem());
             }
             return Optional.empty();
@@ -69,14 +79,19 @@ public class ClassificadorPeca {
 
         if (passando && Duration.between(ultimaAtividade, agora).toMillis() >= fimAposMs) {
             passando = false;
+<<<<<<< HEAD
             TipoPeca tipo = tipoDaPassagem();
             log.info("Passagem de {} ms classificada como {}",
                     Duration.between(inicioPassagem, ultimaAtividade).toMillis(), tipo);
             return Optional.of(tipo);
+=======
+            return Optional.of(tipoDaPassagem());
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
         }
         return Optional.empty();
     }
 
+<<<<<<< HEAD
     /** Desde quando a contagem esta pausada por sensor travado (null se nao esta). */
     public Instant getPausadoDesde() {
         return aguardandoLiberar ? pausadoDesde : null;
@@ -119,6 +134,8 @@ public class ClassificadorPeca {
         return aguardandoLiberar;
     }
 
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
     private TipoPeca tipoDaPassagem() {
         return indutivoPegou ? TipoPeca.METALICA : TipoPeca.NAO_METALICA;
     }

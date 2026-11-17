@@ -60,6 +60,7 @@ class ClassificadorPecaTest {
         assertTrue(c.atualizar(true, true, t.plusMillis(10000), 300, 5000).isEmpty());
         assertEquals(Optional.of(TipoPeca.METALICA), c.atualizar(false, false, t.plusMillis(10500), 300, 5000));
     }
+<<<<<<< HEAD
 
     @Test
     void regraInstantaneaComOsValoresMedidos() {
@@ -94,4 +95,6 @@ class ClassificadorPecaTest {
         assertEquals(TipoPeca.NAO_METALICA,
                 ClassificadorPeca.refinarPorAmplitude(TipoPeca.NAO_METALICA, 32736L, 20000.0, true));
     }
+=======
+>>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
 }

@@ -1,8 +1,8 @@
 import * as mock from './mockApi';
 
-// Cliente da API REST. Contrato esperado (ver README):
+// Contrato esperado (ver README):
 //   GET /api/esteira/status
-//   GET /api/leituras?limite=200
+//   GET /api/leituras?limite=100
 export function createApi({ baseUrl, useMock }) {
   if (useMock) return mock;
 
@@ -26,6 +26,6 @@ export function createApi({ baseUrl, useMock }) {
 
   return {
     getStatus: () => request('/api/esteira/status'),
-    getLeituras: (limite = 200) => request(`/api/leituras?limite=${limite}`),
+    getLeituras: (limite = 100) => request(`/api/leituras?limite=${limite}`),
   };
 }
