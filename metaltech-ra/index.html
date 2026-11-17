@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>MetalTech | RA da esteira</title>
+    <script>
+      // PC sem webcam: abre o modo PC (foto da bancada + elementos de RA). Use ?forcar=1 para ignorar.
+      (async () => {
+        if (location.search.includes('forcar=1')) return;
+        try {
+          const dispositivos = await navigator.mediaDevices.enumerateDevices();
+          if (!dispositivos.some((d) => d.kind === 'videoinput')) location.replace('pc.html');
+        } catch (e) {
+          location.replace('pc.html');
+        }
+      })();
+    </script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="config.js"></script>
+    <script src="js/app.js" defer></script>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, sans-serif; }
+      #barra {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 10px 14px;
+        background: rgba(31, 42, 51, 0.88); color: #fff; font-size: 14px;
+        display: flex; justify-content: space-between; gap: 12px; align-items: center;
+        padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+      }
+      #dica { opacity: 0.9; }
+      #conexao { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+      #conexao i { width: 9px; height: 9px; border-radius: 50%; background: #9aa7b1; display: inline-block; }
+      #conexao.ok i { background: #46c28a; } #conexao.mock i { background: #e0a21a; } #conexao.erro i { background: #e0594e; }
+    </style>
+  </head>
+  <body>
+    <a-scene
+      mindar-image="imageTargetSrc: ./assets/targets.mind; maxTrack: 1; filterMinCF: 0.0005; filterBeta: 0.01;"
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true"
+      vr-mode-ui="enabled: false"
+      device-orientation-permission-ui="enabled: false"
+    >
+      <a-camera position="0 0 0" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+      <a-light type="ambient" color="#ffffff" intensity="1.1"></a-light>
+      <a-light type="directional" color="#ffffff" intensity="1.4" position="0.5 1 1"></a-light>
+      <a-entity id="target" mindar-image-target="targetIndex: 0"></a-entity>
+    </a-scene>
+
+    <div id="barra">
+      <span id="dica">Aponte a câmera para a bancada, de cima.</span>
+      <span id="conexao"><i></i><span id="conexao-txt">Conectando…</span></span>
+    </div>
+  </body>
+</html>

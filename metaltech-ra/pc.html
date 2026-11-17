@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>MetalTech | Gêmeo 3D da esteira</title>
+    <script>window.RA_PC = true;</script>
+    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+    <script src="config.js"></script>
+    <script src="js/gemeo.js"></script>
+    <script src="js/app.js" defer></script>
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, sans-serif; }
+      #barra {
+        position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 10px 14px;
+        background: rgba(31, 42, 51, 0.88); color: #fff; font-size: 14px;
+        display: flex; justify-content: space-between; gap: 12px; align-items: center;
+      }
+      #barra a { color: #e0a21a; }
+      #conexao { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+      #conexao i { width: 9px; height: 9px; border-radius: 50%; background: #9aa7b1; display: inline-block; }
+      #conexao.ok i { background: #46c28a; } #conexao.mock i { background: #e0a21a; } #conexao.erro i { background: #e0594e; }
+      canvas { cursor: grab; touch-action: none; } canvas:active { cursor: grabbing; }
+    </style>
+    <script>
+      // Arrastar: horizontal gira a bancada, vertical inclina. Roda do mouse: zoom.
+      AFRAME.registerComponent('drag-rotate', {
+        init() {
+          const DEG = Math.PI / 180;
+          const o = this.el.object3D;
+          o.rotation.order = 'XYZ';
+          let rx = -55, rz = 0, ultimo = null;
+          const aplicar = () => o.rotation.set(rx * DEG, 0, rz * DEG);
+          aplicar();
+          window.addEventListener('pointerdown', (e) => { ultimo = [e.clientX, e.clientY]; });
+          window.addEventListener('pointerup', () => { ultimo = null; });
+          window.addEventListener('pointermove', (e) => {
+            if (!ultimo) return;
+            rz += (e.clientX - ultimo[0]) * 0.35;
+            rx = Math.max(-88, Math.min(-8, rx + (e.clientY - ultimo[1]) * 0.3));
+            ultimo = [e.clientX, e.clientY];
+            aplicar();
+          });
+          window.addEventListener('wheel', (e) => {
+            const cam = document.querySelector('a-camera').object3D.position;
+            cam.z = Math.max(0.45, Math.min(2.5, cam.z + e.deltaY * 0.001));
+          });
+        },
+      });
+
+      // Mantém textos de frente para a câmera mesmo com a bancada girando.
+      AFRAME.registerComponent('billboard', {
+        init() {
+          this.q = new AFRAME.THREE.Quaternion();
+          this.qp = new AFRAME.THREE.Quaternion();
+        },
+        tick() {
+          const cam = this.el.sceneEl.camera;
+          if (!cam) return;
+          cam.getWorldQuaternion(this.q);
+          const pai = this.el.object3D.parent;
+          if (pai) {
+            pai.getWorldQuaternion(this.qp);
+            this.qp.invert();
+            this.q.premultiply(this.qp);
+          }
+          this.el.object3D.quaternion.copy(this.q);
+        },
+      });
+    </script>
+  </head>
+  <body>
+    <a-scene
+      color-space="sRGB"
+      renderer="colorManagement: true; physicallyCorrectLights: true"
+      vr-mode-ui="enabled: false"
+      background="color: #1f2a33"
+    >
+      <a-camera position="0 0.1 1.15" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
+      <a-entity id="target" drag-rotate>
+        <a-entity id="gemeo" gemeo-3d></a-entity>
+      </a-entity>
+    </a-scene>
+
+    <div id="barra">
+      <span><span id="dica">Modelo 3D</span> · <a href="index.html?forcar=1">Tentar com a câmera</a></span>
+      <span id="conexao"><i></i><span id="conexao-txt">Conectando…</span></span>
+    </div>
+  </body>
+</html>
