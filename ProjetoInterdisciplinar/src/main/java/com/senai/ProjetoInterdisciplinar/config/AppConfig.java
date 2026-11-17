@@ -4,7 +4,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestClient;
@@ -21,13 +20,16 @@ public class AppConfig {
     @Bean
     public RestClient ioLinkRestClient(IoLinkProperties props) {
         Duration timeout = Duration.ofMillis(props.getTimeoutMs());
-        HttpClient httpClient = HttpClient.newBuilder().connectTimeout(timeout).build();
+        HttpClient httpClient = HttpClient.newBuilder()
+                .version(HttpClient.Version.HTTP_1_1)
+                .connectTimeout(timeout)
+                .build();
         JdkClientHttpRequestFactory factory = new JdkClientHttpRequestFactory(httpClient);
         factory.setReadTimeout(timeout);
 
         return RestClient.builder()
                 .requestFactory(factory)
-                .defaultHeader(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE)
+                .defaultHeader(HttpHeaders.ACCEPT, "application/json, text/plain, */*")
                 .build();
     }
 }

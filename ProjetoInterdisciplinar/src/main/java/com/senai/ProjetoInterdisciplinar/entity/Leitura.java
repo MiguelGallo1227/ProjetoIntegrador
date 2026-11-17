@@ -40,4 +40,17 @@ public class Leitura {
 
     @Column(name = "nivel_reservatorio", nullable = false)
     private Double nivelReservatorio;
+
+    /** Maior valor de cada sensor durante a passagem da peca (hex como chegou e decimal). */
+    @Column(name = "hex_indutivo", length = 16)
+    private String hexIndutivo;
+
+    @Column(name = "valor_indutivo")
+    private Long valorIndutivo;
+
+    @Column(name = "hex_capacitivo", length = 16)
+    private String hexCapacitivo;
+
+    @Column(name = "valor_capacitivo")
+    private Long valorCapacitivo;
 }
