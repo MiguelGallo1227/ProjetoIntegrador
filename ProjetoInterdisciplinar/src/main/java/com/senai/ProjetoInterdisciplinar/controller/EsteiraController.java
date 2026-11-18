@@ -47,7 +47,6 @@ public class EsteiraController {
                                             @RequestParam(defaultValue = "100") int limite) {
         return service.historico(porta, limite);
     }
-<<<<<<< HEAD
 
     /** Diagnostico: os dados estao chegando? estao sendo gravados no banco? */
     @GetMapping("/diagnostico")
@@ -68,6 +67,4 @@ public class EsteiraController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }
     }
-=======
->>>>>>> 9181f098cf18e49285f3a4d7478ad2f79bfb6466
 }
