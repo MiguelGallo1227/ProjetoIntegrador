@@ -1,5 +1,7 @@
 // RA da esteira: componente de etiqueta (canvas), leitura da API e conversao de hexadecimal.
 (() => {
+  window.RA_V = window.RA_V || {};
+  window.RA_V.app = 6;
   const cfg = window.RA_CONFIG;
   const THREE = AFRAME.THREE;
   const ASPECT = cfg.TARGET_HEIGHT / cfg.TARGET_WIDTH; // altura do target com largura = 1
@@ -111,8 +113,7 @@
   const painel = document.createElement('a-entity');
   painel.setAttribute('ra-label', { width: 0.9, height: 0.3, px: 1024 });
   painel.setAttribute('position', `0 ${(ASPECT / 2 + 0.2).toFixed(3)} 0.02`);
-  if (window.RA_PC) painel.setAttribute('billboard', '');
-  targetEl.appendChild(painel);
+  if (!window.RA_PC) targetEl.appendChild(painel);
 
   const SENSORES = {
     indutivo:   { titulo: 'Indutivo',   cor: '#2a7f9e' },
@@ -122,6 +123,7 @@
   const etiquetas = {};
   const pinos = {};
   Object.entries(cfg.ANCHORS).forEach(([chave, a]) => {
+    if (window.RA_PC) return; // no modo PC as legendas sao do HUD (hud.js)
     if (!window.RA_PC) {
     const grupo = document.createElement('a-entity');
     grupo.setAttribute('position', posOf(a.u, a.v, 0));
@@ -147,8 +149,7 @@
 
     const et = document.createElement('a-entity');
     et.setAttribute('ra-label', { width: 0.28, height: 0.13, px: 560 });
-    et.setAttribute('position', posOf(a.u, a.v, 0.13, 0.09));
-    if (window.RA_PC) et.setAttribute('billboard', '');
+    et.setAttribute('position', posOf(a.u, a.v, 0.13, a.dy !== undefined ? a.dy : 0.09));
     targetEl.appendChild(et);
     etiquetas[chave] = et;
   });
@@ -269,6 +270,11 @@
   }
 
   function redesenhar() {
+    if (window.RA_PC) {
+      const bruto = ultimo && ultimo.leituras ? ultimo.leituras[ultimo.leituras.length - 1] : null;
+      if (window.RA_HUD) window.RA_HUD.dados({ status: ultimo ? ultimo.status : null, leitura: bruto ? normalize(bruto) : null, erro });
+      return;
+    }
     desenharPainel();
     Object.keys(etiquetas).forEach(desenharSensor);
   }
@@ -308,7 +314,6 @@
   const sceneEl = document.querySelector('a-scene');
   const dicaPadrao = 'Aponte a câmera para a bancada, de cima.';
   if (window.RA_PC) {
-    dica.textContent = 'Modelo 3D: arraste para girar, role para aproximar.';
   } else {
   fetch('./assets/targets.mind')
     .then(async (r) => {

@@ -3,78 +3,94 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>MetalTech | Gêmeo 3D da esteira</title>
+    <title>MetalTech | Gêmeo digital 3D da esteira</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
     <script>window.RA_PC = true;</script>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="config.js"></script>
     <script src="js/gemeo.js"></script>
+    <script src="js/hud.js"></script>
     <script src="js/app.js" defer></script>
     <style>
-      html, body { margin: 0; height: 100%; overflow: hidden; font-family: system-ui, sans-serif; }
-      #barra {
-        position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; padding: 10px 14px;
-        background: rgba(31, 42, 51, 0.88); color: #fff; font-size: 14px;
-        display: flex; justify-content: space-between; gap: 12px; align-items: center;
-      }
-      #barra a { color: #e0a21a; }
+      :root { --grafite: #1f2a33; --ambar: #e0a21a; --metal: #5fc0e3; --nao: #f2a65a; --ok: #46c28a; --erro: #e0594e; --txt: #e8eef2; --suave: #9db2c2; }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; overflow: hidden; font-family: 'IBM Plex Sans', system-ui, sans-serif; color: var(--txt); }
+      canvas { cursor: grab; touch-action: none; } canvas:active { cursor: grabbing; }
+      #hud { position: fixed; inset: 0; pointer-events: none; z-index: 5; }
+      .ui { pointer-events: auto; }
+      h2 { font: 600 15px 'Barlow Semi Condensed', sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--suave); margin: 0 0 10px; }
+
+      .topo { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 12px 16px; }
+      .marca { background: rgba(20,27,33,.82); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.1); border-left: 4px solid var(--ambar); border-radius: 10px; padding: 8px 14px; }
+      .marca b { display: block; font: 700 22px 'Barlow Semi Condensed', sans-serif; letter-spacing: .02em; }
+      .marca span { font-size: 12px; color: var(--suave); }
+      .ferramentas { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+      .grupo { display: inline-flex; gap: 0; } .grupo button { border-radius: 0; } .grupo button:first-child { border-radius: 8px 0 0 8px; } .grupo button:last-child { border-radius: 0 8px 8px 0; }
+      button { font: 500 13px 'IBM Plex Sans', sans-serif; color: var(--txt); background: rgba(20,27,33,.82); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.16); border-radius: 8px; padding: 9px 13px; cursor: pointer; }
+      button:hover { border-color: var(--ambar); }
+      button:focus-visible { outline: 2px solid var(--ambar); outline-offset: 2px; }
+      button.on { background: rgba(224,162,26,.2); border-color: var(--ambar); color: #fff; }
+      button.off { background: rgba(224,89,78,.22); border-color: var(--erro); }
+
+      .painel { position: absolute; top: 92px; background: rgba(20,27,33,.82); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.1); border-radius: 12px; padding: 14px; }
+      .esq { left: 16px; width: 210px; } .dir { right: 16px; width: 276px; display: flex; flex-direction: column; gap: 10px; }
+      .kpi { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,.08); }
+      .kpi span { color: var(--suave); font-size: 13px; } .kpi b { font: 700 30px 'Barlow Semi Condensed', sans-serif; font-variant-numeric: tabular-nums; }
+      .kpi.m b { color: var(--metal); } .kpi.n b { color: var(--nao); }
+      .chip { margin-top: 12px; text-align: center; font-size: 13px; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.08); }
+      .chip.ok { background: rgba(70,194,138,.2); color: #8ee6bb; } .chip.erro { background: rgba(224,89,78,.22); color: #ff9a92; }
+
+      .cartao { border: 1px solid rgba(255,255,255,.1); border-radius: 10px; padding: 10px 12px; background: rgba(255,255,255,.03); transition: border-color .15s, background .15s; }
+      .cartao.ativo { border-color: var(--ok); background: rgba(70,194,138,.12); }
+      .cartao#c-dist.ativo { border-color: #ff5a5a; background: rgba(255,80,80,.12); }
+      .ch { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--suave); }
+      .dot { width: 9px; height: 9px; border-radius: 50%; background: #5b6770; display: inline-block; }
+      .cartao.ativo .dot { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+      .dot.laser { background: #8a3535; } .cartao#c-dist.ativo .dot { background: #ff5a5a; box-shadow: 0 0 8px #ff5a5a; }
+      .big { font: 700 24px 'Barlow Semi Condensed', sans-serif; margin: 4px 0 2px; font-variant-numeric: tabular-nums; } .big u { font-size: 14px; text-decoration: none; color: var(--suave); }
+      .barra { height: 6px; background: rgba(255,255,255,.1); border-radius: 3px; overflow: hidden; margin: 4px 0 6px; } .barra div { height: 100%; width: 100%; background: linear-gradient(90deg, #ff5a5a, #ffb0b0); transition: width .1s linear; }
+      small { display: block; color: var(--suave); font-size: 11.5px; }
+
+      #info { position: absolute; left: 16px; bottom: 64px; width: 320px; background: rgba(20,27,33,.92); backdrop-filter: blur(8px); border: 1px solid var(--ambar); border-radius: 12px; padding: 14px 16px; }
+      #info[hidden] { display: none; }
+      #info h3 { font: 700 18px 'Barlow Semi Condensed', sans-serif; margin: 0 24px 6px 0; } #info p { margin: 0 0 6px; font-size: 13px; line-height: 1.45; color: #cfd9e0; } #info-v { color: var(--ambar); font-weight: 600; font-size: 13px; }
+      #info-x { position: absolute; top: 8px; right: 8px; padding: 2px 9px; font-size: 16px; line-height: 1.2; }
+
+      #legendas { position: absolute; inset: 0; pointer-events: none; }
+      #ligacoes { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+      #ligacoes line { stroke: rgba(224,162,26,.85); stroke-width: 1.2; } #ligacoes circle { fill: var(--ambar); }
+      .leg { position: absolute; left: 0; top: 0; font-size: 12px; line-height: 1.25; background: rgba(20,27,33,.9); color: #fff; border: 1px solid rgba(224,162,26,.65); border-radius: 8px; padding: 5px 9px; white-space: nowrap; cursor: pointer; will-change: transform; }
+      .leg b { display: block; font-weight: 600; } .leg .v { color: var(--ambar); font-variant-numeric: tabular-nums; } .leg .v:empty { display: none; }
+      .leg:hover { border-color: #fff; } .leg.sel { background: var(--ambar); color: var(--grafite); } .leg.sel .v { color: var(--grafite); }
+      body.sem-legendas #legendas { display: none; }
+
+      #barra { position: absolute; left: 0; right: 0; bottom: 0; display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 10px 16px; font-size: 13px; background: rgba(20,27,33,.88); }
+      #barra a { color: var(--ambar); }
       #conexao { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
       #conexao i { width: 9px; height: 9px; border-radius: 50%; background: #9aa7b1; display: inline-block; }
-      #conexao.ok i { background: #46c28a; } #conexao.mock i { background: #e0a21a; } #conexao.erro i { background: #e0594e; }
-      canvas { cursor: grab; touch-action: none; } canvas:active { cursor: grabbing; }
-    </style>
-    <script>
-      // Arrastar: horizontal gira a bancada, vertical inclina. Roda do mouse: zoom.
-      AFRAME.registerComponent('drag-rotate', {
-        init() {
-          const DEG = Math.PI / 180;
-          const o = this.el.object3D;
-          o.rotation.order = 'XYZ';
-          let rx = -55, rz = 0, ultimo = null;
-          const aplicar = () => o.rotation.set(rx * DEG, 0, rz * DEG);
-          aplicar();
-          window.addEventListener('pointerdown', (e) => { ultimo = [e.clientX, e.clientY]; });
-          window.addEventListener('pointerup', () => { ultimo = null; });
-          window.addEventListener('pointermove', (e) => {
-            if (!ultimo) return;
-            rz += (e.clientX - ultimo[0]) * 0.35;
-            rx = Math.max(-88, Math.min(-8, rx + (e.clientY - ultimo[1]) * 0.3));
-            ultimo = [e.clientX, e.clientY];
-            aplicar();
-          });
-          window.addEventListener('wheel', (e) => {
-            const cam = document.querySelector('a-camera').object3D.position;
-            cam.z = Math.max(0.45, Math.min(2.5, cam.z + e.deltaY * 0.001));
-          });
-        },
-      });
+      #conexao.ok i { background: var(--ok); } #conexao.mock i { background: var(--ambar); } #conexao.erro i { background: var(--erro); }
 
-      // Mantém textos de frente para a câmera mesmo com a bancada girando.
-      AFRAME.registerComponent('billboard', {
-        init() {
-          this.q = new AFRAME.THREE.Quaternion();
-          this.qp = new AFRAME.THREE.Quaternion();
-        },
-        tick() {
-          const cam = this.el.sceneEl.camera;
-          if (!cam) return;
-          cam.getWorldQuaternion(this.q);
-          const pai = this.el.object3D.parent;
-          if (pai) {
-            pai.getWorldQuaternion(this.qp);
-            this.qp.invert();
-            this.q.premultiply(this.qp);
-          }
-          this.el.object3D.quaternion.copy(this.q);
-        },
-      });
-    </script>
+      #aviso { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); z-index: 30; max-width: min(720px, 94vw); background: #7a1f1a; color: #fff; border: 1px solid #ff8d84; border-radius: 10px; padding: 10px 14px; font-size: 13px; line-height: 1.4; }
+      #aviso[hidden] { display: none; }
+      @media (max-width: 1000px) { .esq { display: none; } }
+      @media (max-width: 700px) {
+        .dir { top: auto; bottom: 52px; right: 8px; left: 8px; width: auto; flex-direction: row; overflow-x: auto; }
+        .dir .cartao { min-width: 170px; }
+        #info { bottom: 190px; left: 8px; width: calc(100% - 16px); }
+        .ferramentas button { padding: 7px 9px; font-size: 12px; }
+      }
+      @media (prefers-reduced-motion: reduce) { .barra div { transition: none; } }
+    </style>
   </head>
   <body>
     <a-scene
+      hud-loop
       color-space="sRGB"
       renderer="colorManagement: true; physicallyCorrectLights: true"
       vr-mode-ui="enabled: false"
-      background="color: #1f2a33"
+      background="color: #1b242c"
     >
       <a-camera position="0 0.1 1.15" look-controls="enabled: false" wasd-controls="enabled: false"></a-camera>
       <a-entity id="target" drag-rotate>
@@ -82,9 +98,59 @@
       </a-entity>
     </a-scene>
 
-    <div id="barra">
-      <span><span id="dica">Modelo 3D</span> · <a href="index.html?forcar=1">Tentar com a câmera</a></span>
-      <span id="conexao"><i></i><span id="conexao-txt">Conectando…</span></span>
+    <div id="aviso" hidden></div>
+    <script>
+      function avisar(t) { var a = document.getElementById('aviso'); a.textContent = t; a.hidden = false; }
+      window.addEventListener('error', function (e) { avisar('Erro: ' + e.message + ' (' + String(e.filename || '').split('/').pop() + ':' + e.lineno + ')'); });
+      window.addEventListener('load', function () {
+        setTimeout(function () {
+          var V = window.RA_V || {};
+          var ruim = ['gemeo', 'hud', 'app'].filter(function (k) { return V[k] !== 6; }).map(function (k) { return 'js/' + k + '.js'; });
+          if (ruim.length) avisar('Arquivo ausente ou desatualizado: ' + ruim.join(', ') + '. Copie a pasta js/ inteira do zip novo (e pc.html) e recarregue com Ctrl + Shift + R.');
+        }, 1500);
+      });
+    </script>
+
+    <div id="hud">
+      <header class="topo">
+        <div class="marca ui"><b>MetalTech</b><span>Gêmeo digital 3D · Esteira de triagem</span></div>
+        <nav class="ferramentas ui" aria-label="Ferramentas">
+          <button id="b-leg" class="on" aria-pressed="true" title="Mostrar ou esconder legendas (L)">Legendas</button>
+        </nav>
+      </header>
+
+      <aside class="painel esq ui" aria-label="Produção">
+        <h2>Produção</h2>
+        <div class="kpi m"><span>Metálicas</span><b id="k-m">–</b></div>
+        <div class="kpi n"><span>Não metálicas</span><b id="k-n">–</b></div>
+        <div class="kpi"><span>Total de peças</span><b id="k-t">–</b></div>
+        <div id="chip-op" class="chip neutro">Carregando…</div>
+      </aside>
+
+      <aside class="painel dir ui" aria-label="Sensores">
+        <h2>Sensores</h2>
+        <div class="cartao" id="c-ind"><div class="ch"><i class="dot"></i>Sensor indutivo</div><div class="big" id="v-ind">Livre</div><small id="a-ind">Último valor da API: –</small></div>
+        <div class="cartao" id="c-cap"><div class="ch"><i class="dot"></i>Sensor capacitivo</div><div class="big" id="v-cap">Livre</div><small id="a-cap">Último valor da API: –</small></div>
+        <div class="cartao" id="c-dist">
+          <div class="ch"><i class="dot laser"></i>Sensor de distância · laser</div>
+          <div class="big"><span id="v-dist">–</span> <u>mm</u></div>
+          <div class="barra"><div id="g-dist"></div></div>
+          <small>Peças contadas pelo laser: <b id="v-cont">0</b></small>
+          <small id="a-dist">Último valor da API: –</small>
+        </div>
+      </aside>
+
+      <div id="info" class="ui" hidden>
+        <button id="info-x" aria-label="Fechar">×</button>
+        <h3 id="info-t"></h3><p id="info-d"></p><span id="info-v"></span>
+      </div>
+
+      <div id="legendas"><svg id="ligacoes" aria-hidden="true"></svg></div>
+
+      <footer id="barra" class="ui">
+        <span><span id="dica">Arraste para girar · role para aproximar · clique nos sensores</span> · <a href="index.html?forcar=1">Tentar com a câmera</a></span>
+        <span id="conexao"><i></i><span id="conexao-txt">Conectando…</span></span>
+      </footer>
     </div>
   </body>
 </html>

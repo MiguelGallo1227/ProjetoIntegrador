@@ -6,7 +6,13 @@ Consome a mesma API REST do dashboard React.
 
 Elementos 3D: marcadores nos sensores (esfera + haste + anel, que pulsam e ficam verdes quando detectam) e **peças 3D** (dourada = metálica, vermelha = não metálica) que percorrem a esteira a cada leitura nova. O trajeto da peça é o `BELT` no `config.js`.
 
-**Modo PC (gêmeo digital 3D):** se o computador não tiver câmera, `index.html` abre sozinho o `pc.html`: um modelo 3D da bancada (esteira, sensores, cilindros, calhas) em que as peças percorrem a esteira e são empurradas para as calhas (arraste para girar, role para aproximar). O modelo está em `js/gemeo.js`. No celular abre a RA com câmera normalmente.
+**Modo PC (gêmeo digital 3D):** se o computador não tiver câmera, `index.html` abre sozinho o `pc.html`, com um modelo 3D da bancada. Arraste para girar, role para aproximar e clique em um sensor para ver a descrição.
+
+- Botão **Legendas** (ou tecla **L**): mostra/esconde as legendas dos 3 sensores, com o valor ao vivo.
+- Painéis de dados: produção (metálicas, não metálicas, total) e os três sensores.
+- **Sensor de distância a laser:** fica no final da esteira, em um suporte improvisado (bloco de madeira com grampo, poste de cantoneira e abraçadeiras), apontando para as peças que se aproximam. Mede a distância em mm e conta cada peça.
+
+Arquivos: `js/gemeo.js` (modelo 3D), `js/hud.js` (interface) e `pc.html`.
 
 ## 1. Gerar o `targets.mind` (obrigatório)
 O arquivo `assets/targets.mind` **não vem pronto**. Gere assim (igual ao do torno CNC):

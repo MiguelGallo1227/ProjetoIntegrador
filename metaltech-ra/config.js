@@ -17,8 +17,9 @@ window.RA_CONFIG = {
   // Onde cada sensor fica na FOTO, em fracao da imagem: u = 0 (esquerda) a 1 (direita),
   // v = 0 (topo) a 1 (base). Ajuste ate o marcador cair em cima do sensor real.
   ANCHORS: {
-    indutivo:   { u: 0.156, v: 0.347 },
-    capacitivo: { u: 0.131, v: 0.530 },
+    // indutivo e capacitivo ficam um embaixo do outro (mesmo ponto); dy separa as etiquetas
+    indutivo:   { u: 0.131, v: 0.530, dy: -0.10 },
+    capacitivo: { u: 0.131, v: 0.530, dy: 0.10 },
     distancia:  { u: 0.427, v: 0.560 },
   },
 };
