@@ -18,7 +18,7 @@ export default function Configuracoes() {
               checked={useMock} onChange={(e) => update({ useMock: e.target.checked })} />
             <Form.Group className="mb-3" controlId="api-url">
               <Form.Label>URL base da API</Form.Label>
-              <Form.Control value={url} onChange={(e) => setUrl(e.target.value)} placeholder="http://localhost:8080" disabled={useMock} />
+              <Form.Control value={url} onChange={(e) => setUrl(e.target.value)} placeholder="http://localhost:8081" disabled={useMock} />
             </Form.Group>
             <Button size="sm" disabled={useMock || url === apiUrl} onClick={() => update({ apiUrl: url.trim() })}>Salvar URL</Button>
           </Panel>
